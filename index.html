@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CypherKit - Cybersecurity Toolkit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=Audiowide&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1a2332;
+            --accent-cyan: #00d9ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff3366;
+            --accent-amber: #ffaa00;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --border: #2d3748;
+            --glow-cyan: rgba(0, 217, 255, 0.3);
+            --glow-green: rgba(0, 255, 136, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Glowing orbs in background */
+        body::after {
+            content: '';
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--glow-cyan), transparent 70%);
+            top: -300px;
+            right: -300px;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.15; }
+            50% { transform: scale(1.2); opacity: 0.25; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-family: 'Audiowide', cursive;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px var(--glow-cyan);
+            margin-bottom: 0.5rem;
+            letter-spacing: 4px;
+        }
+
+        .tagline {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .warning {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.1), rgba(255, 170, 0, 0.1));
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem 0;
+            font-size: 0.85rem;
+            color: var(--accent-red);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            animation: fadeIn 0.8s ease-out 0.4s both;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            font-family: 'Orbitron', sans-serif;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px var(--glow-cyan);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+            text-shadow: 0 0 20px var(--glow-cyan);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tool Section */
+        .tool-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+            opacity: 0.7;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--accent-green);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Input/Output Areas */
+        .io-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .io-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .io-box {
+            position: relative;
+        }
+
+        .io-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        textarea, input[type="text"], select {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            padding: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"] {
+            min-height: auto;
+        }
+
+        textarea:focus, input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px var(--glow-cyan);
+        }
+
+        select {
+            min-height: auto;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300d9ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 3rem;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            border: none;
+            color: var(--bg-primary);
+            padding: 0.8rem 2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            box-shadow: 0 0 30px var(--glow-cyan);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px var(--glow-cyan);
+        }
+
+        /* Format Selector */
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .format-option {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .format-option:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 217, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .format-option.active {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-green);
+            box-shadow: 0 0 20px var(--glow-green);
+        }
+
+        /* Result Display */
+        .result-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .result-value {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* Strength Meter */
+        .strength-meter {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .strength-bar {
+            height: 100%;
+            transition: all 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .strength-weak { background: var(--accent-red); width: 25%; }
+        .strength-fair { background: var(--accent-amber); width: 50%; }
+        .strength-good { background: var(--accent-green); width: 75%; }
+        .strength-strong { background: var(--accent-cyan); width: 100%; }
+
+        /* Copy Button */
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .copy-btn.copied {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border-color: var(--accent-green);
+        }
+
+        /* Hash Type Badge */
+        .hash-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            color: var(--bg-primary);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        footer a:hover {
+            text-shadow: 0 0 10px var(--glow-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">CYPHERKIT</h1>
+            <p class="tagline">Advanced Cybersecurity Toolkit</p>
+            <div class="warning">
+                ⚠️ FOR EDUCATIONAL AND AUTHORIZED TESTING PURPOSES ONLY ⚠️
+            </div>
+        </header>
+
+        <nav class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('encoder')">Encoder/Decoder</button>
+            <button class="tab-btn" onclick="switchTab('hash')">Hash Analyzer</button>
+            <button class="tab-btn" onclick="switchTab('password')">Password Strength</button>
+        </nav>
+
+        <!-- Encoder/Decoder Tab -->
+        <div id="encoder" class="tab-content active">
+            <div class="tool-section">
+                <h2 class="section-title">⚡ Multi-Format Encoder/Decoder</h2>
+                
+                <div class="format-grid">
+                    <div class="format-option active" onclick="selectFormat('base64')">Base64</div>
+                    <div class="format-option" onclick="selectFormat('url')">URL Encode</div>
+                    <div class="format-option" onclick="selectFormat('hex')">Hexadecimal</div>
+                    <div class="format-option" onclick="selectFormat('binary')">Binary</div>
+                    <div class="format-option" onclick="selectFormat('rot13')">ROT13</div>
+                    <div class="format-option" onclick="selectFormat('ascii')">ASCII Codes</div>
+                </div>
+
+                <div class="io-group">
+                    <div class="io-box">
+                        <label class="io-label">Input Text</label>
+                        <textarea id="encodeInput" placeholder="Enter text to encode..."></textarea>
+                    </div>
+                    <div class="io-box">
+                        <label class="io-label">Encoded Output</label>
+                        <textarea id="encodeOutput" placeholder="Encoded result will appear here..." readonly></textarea>
+                        <button class="copy-btn" onclick="copyToClipboard('encodeOutput')">Copy</button>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn" onclick="encode()">🔐 Encode</button>
+                    <button class="btn" onclick="decode()">🔓 Decode</button>
+                    <button class="btn btn-secondary" onclick="clearEncoder()">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hash Analyzer Tab -->
+        <div id="hash" class="tab-content">
+            <div class="tool-section">
+                <h2 class="section-title">🔍 Hash Identifier & Analyzer</h2>
+                
+                <div class="io-box">
+                    <label class="io-label">Hash Input</label>
+                    <input type="text" id="hashInput" placeholder="Enter hash to identify (e.g., 5d41402abc4b2a76b9719d911017c592)">
+                </div>
+
+                <div class="btn-group" style="margin-top: 1rem;">
+                    <button class="btn" onclick="analyzeHash()">🔍 Analyze Hash</button>
+                    <button class="btn btn-secondary" onclick="clearHash()">Clear</button>
+                </div>
+
+                <div id="hashResult"></div>
+            </div>
+        </div>
+
+        <!-- Password Strength Tab -->
+        <div id="password" class="tab-content">
+            <div class="tool-section">
+                <h2 class="section-title">🛡️ Password Strength Analyzer</h2>
+                
+                <div class="io-box">
+                    <label class="io-label">Password</label>
+                    <input type="text" id="passwordInput" placeholder="Enter password to analyze..." oninput="analyzePassword()">
+                </div>
+
+                <div id="passwordResult"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built with 💚 for ethical hackers and security enthusiasts | 
+            <a href="https://github.com" target="_blank">View on GitHub</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Always obtain proper authorization before testing security on any system.</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentFormat = 'base64';
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Format Selection
+        function selectFormat(format) {
+            currentFormat = format;
+            document.querySelectorAll('.format-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Encoding Functions
+        function encode() {
+            const input = document.getElementById('encodeInput').value;
+            let output = '';
+
+            try {
+                switch(currentFormat) {
+                    case 'base64':
+                        output = btoa(unescape(encodeURIComponent(input)));
+                        break;
+                    case 'url':
+                        output = encodeURIComponent(input);
+                        break;
+                    case 'hex':
+                        output = Array.from(input).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+                        break;
+                    case 'binary':
+                        output = Array.from(input).map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
+                        break;
+                    case 'rot13':
+                        output = input.replace(/[a-zA-Z]/g, c => 
+                            String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26)
+                        );
+                        break;
+                    case 'ascii':
+                        output = Array.from(input).map(c => c.charCodeAt(0)).join(' ');
+                        break;
+                }
+                document.getElementById('encodeOutput').value = output;
+            } catch(e) {
+                document.getElementById('encodeOutput').value = 'Error: ' + e.message;
+            }
+        }
+
+        function decode() {
+            const input = document.getElementById('encodeInput').value;
+            let output = '';
+
+            try {
+                switch(currentFormat) {
+                    case 'base64':
+                        output = decodeURIComponent(escape(atob(input)));
+                        break;
+                    case 'url':
+                        output = decodeURIComponent(input);
+                        break;
+                    case 'hex':
+                        output = input.match(/.{1,2}/g).map(byte => String.fromCharCode(parseInt(byte, 16))).join('');
+                        break;
+                    case 'binary':
+                        output = input.split(' ').map(bin => String.fromCharCode(parseInt(bin, 2))).join('');
+                        break;
+                    case 'rot13':
+                        output = input.replace(/[a-zA-Z]/g, c => 
+                            String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26)
+                        );
+                        break;
+                    case 'ascii':
+                        output = input.split(' ').map(code => String.fromCharCode(parseInt(code))).join('');
+                        break;
+                }
+                document.getElementById('encodeOutput').value = output;
+            } catch(e) {
+                document.getElementById('encodeOutput').value = 'Error: ' + e.message;
+            }
+        }
+
+        function clearEncoder() {
+            document.getElementById('encodeInput').value = '';
+            document.getElementById('encodeOutput').value = '';
+        }
+
+        // Hash Analysis
+        function analyzeHash() {
+            const hash = document.getElementById('hashInput').value.trim();
+            const resultDiv = document.getElementById('hashResult');
+            
+            if (!hash) {
+                resultDiv.innerHTML = '<div class="result-box"><p style="color: var(--accent-red);">Please enter a hash to analyze.</p></div>';
+                return;
+            }
+
+            const hashTypes = identifyHash(hash);
+            
+            let html = '<div class="result-box">';
+            html += '<h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Analysis Results</h3>';
+            
+            if (hashTypes.length === 0) {
+                html += '<p style="color: var(--accent-red);">Unable to identify hash type. Hash may be malformed or unsupported.</p>';
+            } else {
+                html += '<div class="result-item"><span class="result-label">Hash Length:</span><span class="result-value">' + hash.length + ' characters</span></div>';
+                html += '<div class="result-item"><span class="result-label">Possible Types:</span><span class="result-value">';
+                hashTypes.forEach(type => {
+                    html += '<span class="hash-badge">' + type + '</span>';
+                });
+                html += '</span></div>';
+                html += '<div class="result-item"><span class="result-label">Character Set:</span><span class="result-value">' + getCharSet(hash) + '</span></div>';
+            }
+            
+            html += '</div>';
+            resultDiv.innerHTML = html;
+        }
+
+        function identifyHash(hash) {
+            const types = [];
+            const len = hash.length;
+            const isHex = /^[a-fA-F0-9]+$/.test(hash);
+            
+            if (len === 32 && isHex) types.push('MD5', 'NTLM');
+            if (len === 40 && isHex) types.push('SHA-1', 'RIPEMD-160');
+            if (len === 56 && isHex) types.push('SHA-224');
+            if (len === 64 && isHex) types.push('SHA-256', 'BLAKE2s-256');
+            if (len === 96 && isHex) types.push('SHA-384');
+            if (len === 128 && isHex) types.push('SHA-512', 'Whirlpool');
+            if (hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$')) types.push('bcrypt');
+            if (hash.startsWith('$6$')) types.push('SHA-512 crypt');
+            if (hash.startsWith('$5$')) types.push('SHA-256 crypt');
+            if (hash.startsWith('$1$')) types.push('MD5 crypt');
+            if (hash.startsWith('{SHA}')) types.push('LDAP SHA');
+            if (hash.startsWith('{SSHA}')) types.push('LDAP SSHA');
+            
+            return types;
+        }
+
+        function getCharSet(hash) {
+            if (/^[a-fA-F0-9]+$/.test(hash)) return 'Hexadecimal';
+            if (/^[a-zA-Z0-9+/=]+$/.test(hash)) return 'Base64';
+            return 'Mixed/Unknown';
+        }
+
+        function clearHash() {
+            document.getElementById('hashInput').value = '';
+            document.getElementById('hashResult').innerHTML = '';
+        }
+
+        // Password Strength Analysis
+        function analyzePassword() {
+            const password = document.getElementById('passwordInput').value;
+            const resultDiv = document.getElementById('passwordResult');
+            
+            if (!password) {
+                resultDiv.innerHTML = '';
+                return;
+            }
+
+            const analysis = calculateStrength(password);
+            
+            let html = '<div class="result-box">';
+            html += '<h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">Strength Analysis</h3>';
+            html += '<div class="strength-meter"><div class="strength-bar strength-' + analysis.level + '"></div></div>';
+            html += '<div class="result-item"><span class="result-label">Strength:</span><span class="result-value" style="color: ' + analysis.color + '">' + analysis.text + '</span></div>';
+            html += '<div class="result-item"><span class="result-label">Length:</span><span class="result-value">' + password.length + ' characters</span></div>';
+            html += '<div class="result-item"><span class="result-label">Entropy:</span><span class="result-value">' + analysis.entropy.toFixed(2) + ' bits</span></div>';
+            html += '<div class="result-item"><span class="result-label">Score:</span><span class="result-value">' + analysis.score + '/100</span></div>';
+            
+            html += '<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">';
+            html += '<p style="color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600;">Character Types:</p>';
+            html += '<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">';
+            if (analysis.hasLower) html += '<span class="hash-badge" style="background: var(--accent-green);">Lowercase</span>';
+            if (analysis.hasUpper) html += '<span class="hash-badge" style="background: var(--accent-green);">Uppercase</span>';
+            if (analysis.hasNumber) html += '<span class="hash-badge" style="background: var(--accent-green);">Numbers</span>';
+            if (analysis.hasSpecial) html += '<span class="hash-badge" style="background: var(--accent-green);">Special</span>';
+            html += '</div></div>';
+            
+            if (analysis.suggestions.length > 0) {
+                html += '<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">';
+                html += '<p style="color: var(--accent-amber); margin-bottom: 0.5rem; font-weight: 600;">💡 Suggestions:</p>';
+                html += '<ul style="color: var(--text-secondary); font-size: 0.85rem; padding-left: 1.5rem;">';
+                analysis.suggestions.forEach(s => html += '<li style="margin-bottom: 0.3rem;">' + s + '</li>');
+                html += '</ul></div>';
+            }
+            
+            html += '</div>';
+            resultDiv.innerHTML = html;
+        }
+
+        function calculateStrength(password) {
+            let score = 0;
+            const hasLower = /[a-z]/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+            const suggestions = [];
+            
+            // Length scoring
+            if (password.length >= 8) score += 20;
+            if (password.length >= 12) score += 15;
+            if (password.length >= 16) score += 15;
+            else suggestions.push('Use at least 12-16 characters for better security');
+            
+            // Character variety
+            if (hasLower) score += 10;
+            else suggestions.push('Add lowercase letters');
+            if (hasUpper) score += 15;
+            else suggestions.push('Add uppercase letters');
+            if (hasNumber) score += 15;
+            else suggestions.push('Add numbers');
+            if (hasSpecial) score += 20;
+            else suggestions.push('Add special characters (!@#$%^&*)');
+            
+            // Entropy calculation
+            let charsetSize = 0;
+            if (hasLower) charsetSize += 26;
+            if (hasUpper) charsetSize += 26;
+            if (hasNumber) charsetSize += 10;
+            if (hasSpecial) charsetSize += 32;
+            const entropy = password.length * Math.log2(charsetSize || 1);
+            
+            // Bonus for high entropy
+            if (entropy > 60) score += 10;
+            
+            // Common pattern penalty
+            if (/^[0-9]+$/.test(password) || /^[a-zA-Z]+$/.test(password)) {
+                score -= 20;
+                suggestions.push('Avoid using only letters or only numbers');
+            }
+            if (/(.)\1{2,}/.test(password)) {
+                score -= 10;
+                suggestions.push('Avoid repeating characters');
+            }
+            
+            score = Math.max(0, Math.min(100, score));
+            
+            let level, text, color;
+            if (score < 40) {
+                level = 'weak';
+                text = 'WEAK';
+                color = 'var(--accent-red)';
+            } else if (score < 60) {
+                level = 'fair';
+                text = 'FAIR';
+                color = 'var(--accent-amber)';
+            } else if (score < 80) {
+                level = 'good';
+                text = 'GOOD';
+                color = 'var(--accent-green)';
+            } else {
+                level = 'strong';
+                text = 'STRONG';
+                color = 'var(--accent-cyan)';
+            }
+            
+            return {
+                score,
+                level,
+                text,
+                color,
+                entropy,
+                hasLower,
+                hasUpper,
+                hasNumber,
+                hasSpecial,
+                suggestions
+            };
+        }
+
+        // Copy to Clipboard
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const btn = event.target;
+            
+            element.select();
+            document.execCommand('copy');
+            
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            
+            setTimeout(() => {
+                btn.textContent = 'Copy';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+
+        // Auto-focus on first input when tab switches
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                setTimeout(() => {
+                    const activeTab = document.querySelector('.tab-content.active');
+                    const firstInput = activeTab.querySelector('input, textarea');
+                    if (firstInput) firstInput.focus();
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
